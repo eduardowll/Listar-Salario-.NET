@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
 
 namespace Projeto_ESIG.NET.Repository
 {
@@ -50,40 +48,17 @@ namespace Projeto_ESIG.NET.Repository
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
-                string query = @"INSERT INTO Pessoa 
-                               (PessoaId, PessoaNome, Cidade, Email, CEP, Endereco, Pais, Usuario, Telefone, Data_Nascimento, CargoId) 
-                               VALUES (@PessoaId, @PessoaNome, @Cidade, @Email, @CEP, @Endereco, @Pais, @Usuario, @Telefone, @DataNascimento, @CargoId)";
+
+                // Buscar próximo ID
+                SqlCommand getIdCmd = new SqlCommand("SELECT ISNULL(MAX(PessoaId), 0) + 1 FROM Pessoa", conn);
+                int novoId = (int)getIdCmd.ExecuteScalar();
+
+                string query = @"
+                    INSERT INTO Pessoa(PessoaId, PessoaNome, Cidade, Email, CEP, Endereco, Pais, Usuario, Telefone, Data_Nascimento, CargoId)
+                    VALUES(@PessoaId, @PessoaNome, @Cidade, @Email, @CEP, @Endereco, @Pais, @Usuario, @Telefone, @DataNascimento, @CargoId)";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@PessoaId", p.PessoaId);
-                cmd.Parameters.AddWithValue("@PessoaNome", p.PessoaNome);
-                cmd.Parameters.AddWithValue("@Cidade", p.Cidade);
-                cmd.Parameters.AddWithValue("@Email", p.Email);
-                cmd.Parameters.AddWithValue("@CEP", p.CEP);
-                cmd.Parameters.AddWithValue("@Endereco", p.Endereco);
-                cmd.Parameters.AddWithValue("@Pais", p.Pais);
-                cmd.Parameters.AddWithValue("@Usuario", p.Usuario);
-                cmd.Parameters.AddWithValue("@Telefone", p.Telefone);
-                cmd.Parameters.AddWithValue("@DataNascimento", p.Data_Nascimento); // já como string
-                cmd.Parameters.AddWithValue("@CargoId", p.CargoId);
-
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-        public void Update(Pessoa p)
-        {
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                conn.Open();
-                string query = @"UPDATE Pessoa SET 
-                               PessoaNome=@PessoaNome, Cidade=@Cidade, Email=@Email, CEP=@CEP, 
-                               Endereco=@Endereco, Pais=@Pais, Usuario=@Usuario, Telefone=@Telefone, 
-                               Data_Nascimento=@DataNascimento, CargoId=@CargoId
-                               WHERE PessoaId=@PessoaId";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@PessoaId", p.PessoaId);
+                cmd.Parameters.AddWithValue("@PessoaId", novoId);
                 cmd.Parameters.AddWithValue("@PessoaNome", p.PessoaNome);
                 cmd.Parameters.AddWithValue("@Cidade", p.Cidade);
                 cmd.Parameters.AddWithValue("@Email", p.Email);
@@ -94,6 +69,23 @@ namespace Projeto_ESIG.NET.Repository
                 cmd.Parameters.AddWithValue("@Telefone", p.Telefone);
                 cmd.Parameters.AddWithValue("@DataNascimento", p.Data_Nascimento);
                 cmd.Parameters.AddWithValue("@CargoId", p.CargoId);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateCargo(int pessoaId, int novoCargoId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                string query = @"UPDATE Pessoa 
+                         SET CargoId = @CargoId
+                         WHERE PessoaId = @PessoaId";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PessoaId", pessoaId);
+                cmd.Parameters.AddWithValue("@CargoId", novoCargoId);
 
                 cmd.ExecuteNonQuery();
             }

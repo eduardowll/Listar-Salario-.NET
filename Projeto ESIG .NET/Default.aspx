@@ -9,7 +9,6 @@
         <p class="lead">Exibe os salários de funcionários e permite o recálculo.</p>
     </div>
 
-    <!-- Loading precisa estar fora do UpdatePanel -->
     <div id="loading" style="display:none; margin-top:15px; font-weight:bold; color:red;">
         Processando... aguarde
     </div>
@@ -30,13 +29,29 @@
                 <div class="col-md-12">
                     <asp:GridView ID="gvPessoaSalario" runat="server" 
                                   AutoGenerateColumns="false" 
-                                  CssClass="table table-hover table-striped" 
+                                  CssClass="table table-hover table-striped"
+                                  DataKeyNames="pessoa_id"
+                                  OnRowEditing="gvPessoaSalario_RowEditing"
+                                  OnRowUpdating="gvPessoaSalario_RowUpdating"
+                                  OnRowCancelingEdit="gvPessoaSalario_RowCancelingEdit"
+                                  OnRowDeleting="gvPessoaSalario_RowDeleting"
                                   EmptyDataText="Nenhum registro de salário encontrado. Clique em 'Calcular' para popular os dados.">
                         <Columns>
-                            <asp:BoundField DataField="pessoa_id" HeaderText="ID" />
-                            <asp:BoundField DataField="pessoa_nome" HeaderText="Nome da Pessoa" />
-                            <asp:BoundField DataField="cargo_nome" HeaderText="Cargo" />
-                            <asp:BoundField DataField="salario" HeaderText="Salário" DataFormatString="{0:C}" />
+                            <asp:BoundField DataField="pessoa_id" HeaderText="ID" ReadOnly="true" />
+                            <asp:BoundField DataField="pessoa_nome" HeaderText="Nome da Pessoa" ReadOnly="true" />
+
+
+                            <asp:TemplateField HeaderText="Cargo">
+                                <ItemTemplate>
+                                    <%# Eval("cargo_nome") %>
+                                </ItemTemplate>
+                                <EditItemTemplate>
+                                    <asp:DropDownList ID="ddlCargos" runat="server"></asp:DropDownList>
+                                </EditItemTemplate>
+                            </asp:TemplateField>
+
+                            <asp:BoundField DataField="salario" HeaderText="Salário" DataFormatString="{0:C}" ReadOnly="true" />
+                            <asp:CommandField ShowEditButton="true" ShowDeleteButton="true" />
                         </Columns>
                     </asp:GridView>
                 </div>
